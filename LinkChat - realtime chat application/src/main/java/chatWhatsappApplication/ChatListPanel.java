@@ -93,7 +93,8 @@ public class ChatListPanel extends JPanel {
         add(new JScrollPane(tileContainer), BorderLayout.CENTER);
 
         // Chargement initial des contacts
-        loadFriends();
+        // loadFriends();
+        wsClient.setOnlineStatusListener(this::updateOnlineStatus);
     }
 
     private void styleOptionButton(JButton btn) {
@@ -150,6 +151,13 @@ public class ChatListPanel extends JPanel {
         }
     }
 
+    private List<String> lastOnlineEmails = new ArrayList<>();
+
+    private void updateOnlineStatus(List<String> onlineEmails) {
+        lastOnlineEmails = onlineEmails;
+        loadFriends();
+    }
+
     public void loadFriends() {
         tiles.clear();
         tileContainer.removeAll();
@@ -161,22 +169,26 @@ public class ChatListPanel extends JPanel {
             JOIN users u ON u.id = f.friend_id
             WHERE f.user_id = ?
             """;
-
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
+            // Use a Set to avoid duplicates
+            java.util.Set<String> seenEmails = new java.util.HashSet<>();
             while (rs.next()) {
                 String nom    = rs.getString("first_name") + " " + rs.getString("last_name");
                 String email  = rs.getString("email");
                 String img    = rs.getString("profile_image");
-                addTile(nom, "Connecté", "Aujourd'hui", img, email);
+                if (seenEmails.add(email)) { // Only add if not already present
+                    boolean isOnline = lastOnlineEmails.contains(email);
+                    String status = isOnline ? "En ligne" : "Hors ligne";
+                    addTile(nom, status, "Aujourd'hui", img, email);
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-
         revalidate();
         repaint();
     }

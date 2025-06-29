@@ -15,6 +15,16 @@ public class ChatServer extends WebSocketServer {
     public ChatServer(int port) {
         super(new InetSocketAddress(port));
     }
+    
+    private void broadcastOnlineList() {
+        Message response = new Message();
+        response.type = "onlineList";
+        response.content = gson.toJson(clients.keySet());
+        String json = gson.toJson(response);
+        for (WebSocket ws : clients.values()) {
+            ws.send(json);
+        }
+    }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
@@ -23,8 +33,18 @@ public class ChatServer extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        clients.values().removeIf(v -> v.equals(conn));
-        System.out.println("Client disconnected");
+        // Remove user from clients map
+        String disconnectedEmail = null;
+        for (Map.Entry<String, WebSocket> entry : clients.entrySet()) {
+            if (entry.getValue().equals(conn)) {
+                disconnectedEmail = entry.getKey();
+                break;
+            }
+        }
+        if (disconnectedEmail != null) {
+            clients.remove(disconnectedEmail);
+            broadcastOnlineList(); // Notify all clients
+        }
     }
 
     @Override
@@ -32,9 +52,16 @@ public class ChatServer extends WebSocketServer {
         Message m = gson.fromJson(message, Message.class);
         if (m.type.equals("login")) {
             clients.put(m.from, conn);
+            broadcastOnlineList(); // Notify all clients
         } else if (m.type.equals("msg")) {
             WebSocket dest = clients.get(m.to);
             if (dest != null) dest.send(message);
+        } else if (m.type.equals("whoisonline")) {
+            // Respond with the list of online emails
+            Message response = new Message();
+            response.type = "onlineList";
+            response.content = gson.toJson(clients.keySet());
+            conn.send(gson.toJson(response));
         }
     }
 
@@ -46,6 +73,10 @@ public class ChatServer extends WebSocketServer {
     @Override
     public void onStart() {
         System.out.println("✅ WebSocket server started on port " + getPort());
+    }
+
+    public Set<String> getOnlineEmails() {
+        return clients.keySet();
     }
 
     public static void main(String[] args) {

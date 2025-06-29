@@ -30,5 +30,6 @@ chatWhatsappApplication\service\ContactService.class
 chatWhatsappApplication\service\MessageService.class
 chatWhatsappApplication\service\MessageService$Message.class
 chatWhatsappApplication\DiscussionDetail.class
+chatWhatsappApplication\client\ChatClient$OnlineStatusListener.class
 chatWhatsappApplication\ProfilePanel$3.class
 chatWhatsappApplication\Constants.class

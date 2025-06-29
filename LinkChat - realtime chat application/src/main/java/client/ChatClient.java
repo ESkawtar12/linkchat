@@ -21,6 +21,8 @@ public class ChatClient extends WebSocketClient {
         // Connexion établie : s’identifier auprès du serveur
         Message login = new Message("login", myEmail, null, null);
         send(gson.toJson(login));
+        // Now safe to request online list
+        requestOnlineList();
     }
 
     public interface MessageListener {
@@ -35,8 +37,15 @@ public class ChatClient extends WebSocketClient {
 
     @Override
     public void onMessage(String messageJson) {
-        // Nouveau message reçu
         Message message = gson.fromJson(messageJson, Message.class);
+        if ("onlineList".equals(message.type)) {
+            // Notify listeners with the list of online emails
+            java.util.List<String> onlineEmails = gson.fromJson(message.content, java.util.List.class);
+            if (onlineStatusListener != null) {
+                onlineStatusListener.onOnlineStatusReceived(onlineEmails);
+            }
+            return;
+        }
         System.out.println("Message from " + message.from + ": " + message.content);
         if (messageListener != null) {
             messageListener.onMessageReceived(message.from, message.content);
@@ -60,6 +69,11 @@ public class ChatClient extends WebSocketClient {
 
     }
 
+    public void requestOnlineList() {
+        Message msg = new Message("whoisonline", myEmail, null, null);
+        send(gson.toJson(msg));
+    }
+
     // Classe interne pour représenter les messages JSON
     static class Message {
         String type;
@@ -73,5 +87,16 @@ public class ChatClient extends WebSocketClient {
             this.to = to;
             this.content = content;
         }
+    }
+
+    // Add a listener interface:
+    public interface OnlineStatusListener {
+        void onOnlineStatusReceived(java.util.List<String> onlineEmails);
+    }
+
+    private OnlineStatusListener onlineStatusListener;
+
+    public void setOnlineStatusListener(OnlineStatusListener listener) {
+        this.onlineStatusListener = listener;
     }
 }
