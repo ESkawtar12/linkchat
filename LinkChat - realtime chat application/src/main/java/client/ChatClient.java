@@ -40,6 +40,17 @@ public class ChatClient extends WebSocketClient {
     @Override
     public void onMessage(String messageJson) {
         Message message = gson.fromJson(messageJson, Message.class);
+        if ("edit".equals(message.type)) {
+            String[] parts = message.content.split(":", 2);
+            int msgId = Integer.parseInt(parts[0]);
+            String newContent = parts[1];
+            MessageService.editMessage(msgId, newContent);
+            DiscussionDetail panel = chatWhatsappApplication.Main.discussionPanels.get(message.from);
+            if (panel != null) {
+                SwingUtilities.invokeLater(panel::loadPreviousMessages);
+            }
+            return;
+        }
         if ("onlineList".equals(message.type)) {
             // Notify listeners with the list of online emails
             java.util.List<String> onlineEmails = gson.fromJson(message.content, java.util.List.class);
@@ -114,6 +125,11 @@ public class ChatClient extends WebSocketClient {
 
     public void sendDeleteMessage(String to, int messageId) {
         Message message = new Message("delete", myEmail, to, String.valueOf(messageId));
+        send(gson.toJson(message));
+    }
+
+    public void sendEditMessage(String to, int messageId, String newContent) {
+        Message message = new Message("edit", myEmail, to, messageId + ":" + newContent);
         send(gson.toJson(message));
     }
 }

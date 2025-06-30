@@ -134,13 +134,14 @@ public class DiscussionDetail extends JPanel {
 
     private JComponent createMessageBubble(MessageService.Message msg, boolean isSent) {
         String text = msg.deleted ? "<i>Message supprimé</i>" : msg.content;
-        String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
+        String time = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
         text = text.replace("\n", "<br>");
+        String editedMark = msg.edited ? " <span style='color:gray;'>(édité)</span>" : "";
         String bgColor = isSent
             ? String.format("#%02x%02x%02x", Colors.MESSAGE_BUBBLE.getRed(), Colors.MESSAGE_BUBBLE.getGreen(), Colors.MESSAGE_BUBBLE.getBlue())
             : "#FFFFFF";
         String html = "<html><div style='width:220px; word-wrap:break-word; padding:6px 10px; background-color:" + bgColor + "; border:1px solid #ddd; border-radius:12px;'>"
-                + "<div style='font-size:12px; color:black;'>" + text + "</div>"
+                + "<div style='font-size:12px; color:black;'>" + text + editedMark + "</div>"
                 + "<div style='font-size:10px; color:gray; text-align:right; margin-top:4px;'>" + time + "</div>"
                 + "</div></html>";
         JLabel lbl = new JLabel(html);
@@ -230,13 +231,29 @@ public class DiscussionDetail extends JPanel {
         deleteItem.addActionListener(e -> {
             MessageService.deleteMessage(msg.id);
             msg.deleted = true;
-            // Notify the other user in real-time
             if (wsClient != null) {
                 wsClient.sendDeleteMessage(contactEmail, msg.id);
             }
             loadPreviousMessages();
         });
         menu.add(deleteItem);
+
+        // Add edit option
+        JMenuItem editItem = new JMenuItem("Modifier");
+        editItem.addActionListener(e -> {
+            String newContent = JOptionPane.showInputDialog(this, "Modifier le message :", msg.content);
+            if (newContent != null && !newContent.trim().isEmpty() && !msg.deleted) {
+                MessageService.editMessage(msg.id, newContent);
+                msg.content = newContent;
+                msg.edited = true;
+                if (wsClient != null) {
+                    wsClient.sendEditMessage(contactEmail, msg.id, newContent);
+                }
+                loadPreviousMessages();
+            }
+        });
+        menu.add(editItem);
+
         return menu;
     }
 

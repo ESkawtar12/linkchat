@@ -24,7 +24,7 @@ public class MessageService {
 
     public static List<Message> getMessages(String user1, String user2) {
         List<Message> messages = new ArrayList<>();
-        String sql = "SELECT id, sender_email, recipient_email, content, deleted FROM messages " +
+        String sql = "SELECT id, sender_email, recipient_email, content, deleted, edited FROM messages " +
                      "WHERE (sender_email = ? AND recipient_email = ?) " +
                      "   OR (sender_email = ? AND recipient_email = ?) " +
                      "ORDER BY id ASC";
@@ -41,7 +41,8 @@ public class MessageService {
                     rs.getString("sender_email"),
                     rs.getString("recipient_email"),
                     rs.getString("content"),
-                    rs.getBoolean("deleted")
+                    rs.getBoolean("deleted"),
+                    rs.getBoolean("edited")
                 ));
             }
         } catch (SQLException e) {
@@ -67,19 +68,37 @@ public class MessageService {
         public String sender;
         public String receiver;
         public String content;
-        public boolean deleted; 
+        public boolean deleted;
+        public boolean edited; // NEW
 
-      
-        public Message(int id, String sender, String receiver, String content, boolean deleted) {
+        public Message(int id, String sender, String receiver, String content, boolean deleted, boolean edited) {
             this.id = id;
             this.sender = sender;
             this.receiver = receiver;
             this.content = content;
             this.deleted = deleted;
+            this.edited = edited;
+        }
+
+        public Message(int id, String sender, String receiver, String content, boolean deleted) {
+            this(id, sender, receiver, content, deleted, false);
         }
 
         public Message(String sender, String receiver, String content) {
-            this(-1, sender, receiver, content, false);
+            this(-1, sender, receiver, content, false, false);
+        }
+    }
+
+    // Add this method:
+    public static void editMessage(int messageId, String newContent) {
+        String sql = "UPDATE messages SET content = ?, edited = TRUE WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newContent);
+            stmt.setInt(2, messageId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

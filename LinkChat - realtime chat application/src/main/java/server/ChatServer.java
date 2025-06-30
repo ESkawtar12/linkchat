@@ -65,6 +65,9 @@ public class ChatServer extends WebSocketServer {
             response.type = "onlineList";
             response.content = gson.toJson(clients.keySet());
             conn.send(gson.toJson(response));
+        } else if (m.type.equals("edit")) {
+            WebSocket dest = clients.get(m.to);
+            if (dest != null) dest.send(message);
         }
     }
 
