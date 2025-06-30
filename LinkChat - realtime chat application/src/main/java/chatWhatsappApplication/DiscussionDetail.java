@@ -220,6 +220,10 @@ public class DiscussionDetail extends JPanel {
             boolean isSent = msg.sender.equals(myEmail);
             messagePanel.add(createMessageBubble(msg, isSent));
         }
+        // Mark as read
+        MessageService.markAsRead(contactEmail, myEmail);
+        // Update chat list UI
+        ChatListPanel.getInstance().loadFriends();
         messagePanel.revalidate();
         messagePanel.repaint();
         scrollToBottom();

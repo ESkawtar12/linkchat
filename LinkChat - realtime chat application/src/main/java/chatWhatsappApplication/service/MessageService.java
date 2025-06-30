@@ -10,7 +10,7 @@ import java.util.List;
 
 public class MessageService {
     public static void saveMessage(String sender, String receiver, String content) {
-        String sql = "INSERT INTO messages (sender_email, recipient_email, content) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO messages (sender_email, recipient_email, content, is_read) VALUES (?, ?, ?, FALSE)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, sender);
@@ -96,6 +96,34 @@ public class MessageService {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, newContent);
             stmt.setInt(2, messageId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int getUnreadCount(String sender, String receiver) {
+        String sql = "SELECT COUNT(*) FROM messages WHERE sender_email = ? AND recipient_email = ? AND is_read = FALSE";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, sender);
+            stmt.setString(2, receiver);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static void markAsRead(String sender, String receiver) {
+        String sql = "UPDATE messages SET is_read = TRUE WHERE sender_email = ? AND recipient_email = ? AND is_read = FALSE";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, sender);
+            stmt.setString(2, receiver);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

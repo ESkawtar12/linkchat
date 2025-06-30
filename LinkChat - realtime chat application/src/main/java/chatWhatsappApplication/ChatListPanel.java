@@ -3,6 +3,7 @@ package chatWhatsappApplication;
 import chatWhatsappApplication.service.AuthService;
 import chatWhatsappApplication.service.ContactService;
 import chatWhatsappApplication.service.DatabaseConnection;
+import chatWhatsappApplication.service.MessageService;
 import chatWhatsappApplication.client.ChatClient;
 
 import javax.swing.*;
@@ -183,7 +184,12 @@ public class ChatListPanel extends JPanel {
                 if (seenEmails.add(email)) { // Only add if not already present
                     boolean isOnline = lastOnlineEmails.contains(email);
                     String status = isOnline ? "En ligne" : "Hors ligne";
-                    addTile(nom, status, "Aujourd'hui", img, email);
+                    int unreadCount = MessageService.getUnreadCount(email, AuthService.getInstance().getCurrentUser().getEmail());
+                    String displayName = nom;
+                    if (unreadCount > 0) {
+                        displayName += " (" + unreadCount + ")";
+                    }
+                    addTile(displayName, status, "Aujourd'hui", img, email);
                 }
             }
         } catch (SQLException ex) {
