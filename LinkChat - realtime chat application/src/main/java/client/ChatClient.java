@@ -4,6 +4,8 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import com.google.gson.Gson;
 import chatWhatsappApplication.service.MessageService;
+import chatWhatsappApplication.DiscussionDetail;
+import javax.swing.SwingUtilities;
 
 import java.net.URI;
 
@@ -43,6 +45,16 @@ public class ChatClient extends WebSocketClient {
             java.util.List<String> onlineEmails = gson.fromJson(message.content, java.util.List.class);
             if (onlineStatusListener != null) {
                 onlineStatusListener.onOnlineStatusReceived(onlineEmails);
+            }
+            return;
+        }
+        if ("delete".equals(message.type)) {
+            int msgId = Integer.parseInt(message.content);
+            MessageService.deleteMessage(msgId);
+            // Notify UI to refresh if this chat is open
+            DiscussionDetail panel = chatWhatsappApplication.Main.discussionPanels.get(message.from);
+            if (panel != null) {
+                SwingUtilities.invokeLater(panel::loadPreviousMessages);
             }
             return;
         }
@@ -98,5 +110,10 @@ public class ChatClient extends WebSocketClient {
 
     public void setOnlineStatusListener(OnlineStatusListener listener) {
         this.onlineStatusListener = listener;
+    }
+
+    public void sendDeleteMessage(String to, int messageId) {
+        Message message = new Message("delete", myEmail, to, String.valueOf(messageId));
+        send(gson.toJson(message));
     }
 }

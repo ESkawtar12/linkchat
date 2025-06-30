@@ -164,12 +164,10 @@ public class DiscussionDetail extends JPanel {
             System.out.println("Message not sent: empty or wsClient is null");
             return;
         }
-        messagePanel.add(createMessageBubble(text, true));
-        inputField.setText("");
-        messagePanel.revalidate();
-        messagePanel.repaint();
-        scrollToBottom();
         wsClient.sendMessage(contactEmail, text);
+        inputField.setText("");
+        // Instead of adding the bubble directly, reload all messages:
+        loadPreviousMessages();
     }
 
     public void receiveMessage(String text) {
@@ -213,7 +211,7 @@ public class DiscussionDetail extends JPanel {
         nameLabel.setText(newName);
     }
 
-    private void loadPreviousMessages() {
+    public void loadPreviousMessages() {
         messagePanel.removeAll();
         String myEmail = AuthService.getInstance().getCurrentUser().getEmail();
         java.util.List<MessageService.Message> messages = MessageService.getMessages(myEmail, contactEmail);
@@ -230,9 +228,12 @@ public class DiscussionDetail extends JPanel {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem deleteItem = new JMenuItem("Supprimer");
         deleteItem.addActionListener(e -> {
-            MessageService.deleteMessage(msg.id); // You need to add 'id' to Message class and fetch it from DB
+            MessageService.deleteMessage(msg.id);
             msg.deleted = true;
-            // Refresh UI (reload messages or update this bubble)
+            // Notify the other user in real-time
+            if (wsClient != null) {
+                wsClient.sendDeleteMessage(contactEmail, msg.id);
+            }
             loadPreviousMessages();
         });
         menu.add(deleteItem);

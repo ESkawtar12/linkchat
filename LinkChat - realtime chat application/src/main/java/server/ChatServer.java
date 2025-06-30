@@ -56,6 +56,9 @@ public class ChatServer extends WebSocketServer {
         } else if (m.type.equals("msg")) {
             WebSocket dest = clients.get(m.to);
             if (dest != null) dest.send(message);
+        } else if (m.type.equals("delete")) {
+            WebSocket dest = clients.get(m.to);
+            if (dest != null) dest.send(message);
         } else if (m.type.equals("whoisonline")) {
             // Respond with the list of online emails
             Message response = new Message();
