@@ -28,6 +28,7 @@ public class ChatListPanel extends JPanel {
     private final JPanel optionsPanel;
     private final ChatClient wsClient;
     private boolean optionsVisible = false;
+    private final List<FriendInfo> allFriends = new ArrayList<>(); // Add this to store all friends
 
     public ChatListPanel(JPanel mainPanel, CardLayout cardLayout, ChatClient wsClient) {
         instance = this;
@@ -49,6 +50,12 @@ public class ChatListPanel extends JPanel {
         top.add(new JLabel(new ImageIcon("src/main/java/resources/search.png")), BorderLayout.WEST);
         top.add(search, BorderLayout.CENTER);
 
+        // Add this listener for live filtering
+        search.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filterContacts(search.getText()); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filterContacts(search.getText()); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filterContacts(search.getText()); }
+        });
         JButton btnOptions = new JButton(new ImageIcon(
             new ImageIcon("src/main/java/resources/more.png").getImage()
             .getScaledInstance(24, 24, Image.SCALE_SMOOTH)
@@ -163,9 +170,23 @@ public class ChatListPanel extends JPanel {
         loadFriends();
     }
 
+    // Helper class to store friend info
+    private static class FriendInfo {
+        String displayName, status, date, img, email;
+        FriendInfo(String displayName, String status, String date, String img, String email) {
+            this.displayName = displayName;
+            this.status = status;
+            this.date = date;
+            this.img = img;
+            this.email = email;
+        }
+    }
+
+    // Update loadFriends to fill allFriends and filter
     public void loadFriends() {
         tiles.clear();
         tileContainer.removeAll();
+        allFriends.clear(); // Clear before loading
         int userId = AuthService.getInstance().getCurrentUser().getId();
 
         String sql = """
@@ -179,13 +200,12 @@ public class ChatListPanel extends JPanel {
 
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
-            // Use a Set to avoid duplicates
             java.util.Set<String> seenEmails = new java.util.HashSet<>();
             while (rs.next()) {
                 String nom    = rs.getString("first_name") + " " + rs.getString("last_name");
                 String email  = rs.getString("email");
                 String img    = rs.getString("profile_image");
-                if (seenEmails.add(email)) { // Only add if not already present
+                if (seenEmails.add(email)) {
                     boolean isOnline = lastOnlineEmails.contains(email);
                     String status = isOnline ? "En ligne" : "Hors ligne";
                     int unreadCount = MessageService.getUnreadCount(email, AuthService.getInstance().getCurrentUser().getEmail());
@@ -193,11 +213,28 @@ public class ChatListPanel extends JPanel {
                     if (unreadCount > 0) {
                         displayName += " (" + unreadCount + ")";
                     }
-                    addTile(displayName, status, "Aujourd'hui", img, email);
+                    allFriends.add(new FriendInfo(displayName, status, "Aujourd'hui", img, email));
                 }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
+        }
+        filterContacts(""); // Show all by default
+        revalidate();
+        repaint();
+    }
+
+    // New method to filter and display contacts
+    private void filterContacts(String query) {
+        tiles.clear();
+        tileContainer.removeAll();
+        String lower = query.toLowerCase();
+        // Make a copy to avoid ConcurrentModificationException
+        List<FriendInfo> friendsSnapshot = new ArrayList<>(allFriends);
+        for (FriendInfo f : friendsSnapshot) {
+            if (f.displayName.toLowerCase().contains(lower) || f.email.toLowerCase().contains(lower)) {
+                addTile(f.displayName, f.status, f.date, f.img, f.email);
+            }
         }
         revalidate();
         repaint();

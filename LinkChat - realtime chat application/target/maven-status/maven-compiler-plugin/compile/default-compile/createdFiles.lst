@@ -20,6 +20,8 @@ chatWhatsappApplication\ProfilePanel$4.class
 chatWhatsappApplication\ProfilePanel$2.class
 chatWhatsappApplication\ContactProfilePanel$1.class
 chatWhatsappApplication\model\User.class
+chatWhatsappApplication\ChatListPanel$FriendInfo.class
+chatWhatsappApplication\ChatListPanel$1.class
 chatWhatsappApplication\ProfilePanel$1.class
 chatWhatsappApplication\client\ChatClient$Message.class
 chatWhatsappApplication\server\ChatServer$Message.class
