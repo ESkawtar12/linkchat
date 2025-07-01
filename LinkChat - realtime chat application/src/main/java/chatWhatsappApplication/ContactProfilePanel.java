@@ -38,7 +38,7 @@ public class ContactProfilePanel extends JPanel {
 
         JButton backButton = new JButton();
         backButton.setIcon(new ImageIcon(
-                new ImageIcon("src/resources/angle-left.png").getImage()
+                new ImageIcon("src/main/java/resources/angle-left.png").getImage()
                         .getScaledInstance(24, 24, Image.SCALE_SMOOTH)));
         backButton.setBorderPainted(false);
         backButton.setContentAreaFilled(false);
@@ -92,7 +92,7 @@ public class ContactProfilePanel extends JPanel {
         JButton editNameBtn = new JButton();
 
         editNameBtn.setIcon(new ImageIcon(
-                new ImageIcon("src/resources/pen.png").getImage()
+                new ImageIcon("src/main/java/resources/pen.png").getImage()
                         .getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
         editNameBtn.setBorderPainted(false);
         editNameBtn.setContentAreaFilled(false);

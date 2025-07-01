@@ -36,25 +36,44 @@ public class DiscussionDetail extends JPanel {
     public DiscussionDetail(String name, String email, JPanel mainPanel, CardLayout cardLayout, ChatClient wsClient) {
         this.contactName = name;
         this.contactEmail = email;
-        this.imagePath = "src/resources/default_profile.png"; // à personnaliser si besoin
+        this.imagePath = "src/main/java/resources/default_profile.png";
         this.mainPanel = mainPanel;
         this.cardLayout = cardLayout;
         this.wsClient = wsClient;
 
         setLayout(new BorderLayout());
         setBackground(Constants.WH_BACKGROUND);
-        // Top bar
+
+        // --- Top bar with rounded corners and shadow ---
         ImageIcon icon = new ImageIcon(
-            new ImageIcon(imagePath).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+            new ImageIcon(imagePath).getImage().getScaledInstance(36, 36, Image.SCALE_SMOOTH)
         );
-        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        backButton = new JButton(new ImageIcon("src/resources/angle-left.png"));
-        backButton.setBackground(Constants.WH_GREEN);
-        backButton.setBorder(null);
+        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 8)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Constants.WH_GREEN);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
+                // subtle shadow
+                g2.setColor(new Color(0, 0, 0, 20));
+                g2.fillRoundRect(2, getHeight() - 8, getWidth() - 4, 8, 8, 8);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        topBar.setOpaque(false);
+
+        backButton = new JButton(new ImageIcon("src/main/java/resources/angle-left.png"));
+        backButton.setBackground(new Color(0,0,0,0));
+        backButton.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backButton.setFocusable(false);
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "ChatList"));
 
         JLabel iconLabel = new JLabel(icon);
         iconLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
         iconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -65,6 +84,8 @@ public class DiscussionDetail extends JPanel {
         nameLabel = new JLabel(contactName);
         nameLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
         nameLabel.setForeground(Color.WHITE);
+        nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
         nameLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -75,23 +96,60 @@ public class DiscussionDetail extends JPanel {
         topBar.add(backButton);
         topBar.add(iconLabel);
         topBar.add(nameLabel);
-        topBar.setBackground(Constants.WH_GREEN);
 
-        // Message area
+        // --- Message area ---
         messagePanel = new JPanel();
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
         messagePanel.setBackground(Constants.WH_BACKGROUND);
+        messagePanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
         JScrollPane scrollPane = new JScrollPane(messagePanel);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        // Input area
-        JPanel inputPanel = new JPanel(new BorderLayout());
+        // --- Input area with rounded corners and shadow ---
+        JPanel inputPanel = new JPanel(new BorderLayout(8, 0)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
+                // subtle shadow
+                g2.setColor(new Color(0, 0, 0, 15));
+                g2.fillRoundRect(2, getHeight() - 8, getWidth() - 4, 8, 8, 8);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        inputPanel.setOpaque(false);
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+
         inputField = new JTextField();
+        inputField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        inputField.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+        inputField.setBackground(new Color(245, 249, 250));
+        inputField.setForeground(new Color(34, 40, 49));
         inputField.addActionListener(this::sendMessage);
-        JButton sendButton = new JButton(new ImageIcon("src/resources/send_icon.png"));
+
+        // --- Fix send button icon and style ---
+        ImageIcon sendIcon;
+        try {
+            Image img = new ImageIcon("src/main/java/resources/send_icon.png").getImage().getScaledInstance(22, 22, Image.SCALE_SMOOTH);
+            sendIcon = new ImageIcon(img);
+        } catch (Exception ex) {
+            sendIcon = new ImageIcon("src/main/java/resources/send_icon.png");
+        }
+        JButton sendButton = new JButton(sendIcon);
         sendButton.setBackground(Constants.WH_GREEN);
+        sendButton.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        sendButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        sendButton.setFocusable(false);
+        sendButton.setContentAreaFilled(true);
+        sendButton.setOpaque(true);
+        sendButton.setBorderPainted(false);
         sendButton.addActionListener(this::sendMessage);
+
         inputPanel.add(inputField, BorderLayout.CENTER);
         inputPanel.add(sendButton, BorderLayout.EAST);
 
@@ -117,14 +175,16 @@ public class DiscussionDetail extends JPanel {
         text = text.replace("\n", "<br>");
         String bgColor = isSent
             ? String.format("#%02x%02x%02x", Colors.MESSAGE_BUBBLE.getRed(), Colors.MESSAGE_BUBBLE.getGreen(), Colors.MESSAGE_BUBBLE.getBlue())
-            : "#FFFFFF";
-        String html = "<html><div style='width:220px; word-wrap:break-word; padding:6px 10px; background-color:" + bgColor + "; border:1px solid #ddd; border-radius:12px;'>"
-                + "<div style='font-size:12px; color:black;'>" + text + "</div>"
-                + "<div style='font-size:10px; color:gray; text-align:right; margin-top:4px;'>" + time + "</div>"
+            : "#F5F9FA";
+        String borderColor = isSent ? "#B2DFDB" : "#E0E0E0";
+        // --- Make bubble smaller and more rounded ---
+        String html = "<html><div style='width:170px; word-wrap:break-word; padding:8px 14px; background-color:" + bgColor + "; border:1px solid " + borderColor + "; border-radius:24px;'>"
+                + "<div style='font-size:12px; color:#222831;'>" + text + "</div>"
+                + "<div style='font-size:9px; color:gray; text-align:right; margin-top:3px;'>" + time + "</div>"
                 + "</div></html>";
         JLabel lbl = new JLabel(html);
-        lbl.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        lbl.setMaximumSize(new Dimension(300, Integer.MAX_VALUE));
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lbl.setMaximumSize(new Dimension(220, Integer.MAX_VALUE));
         JPanel wrapper = new JPanel(new FlowLayout(isSent ? FlowLayout.RIGHT : FlowLayout.LEFT, 0, 0));
         wrapper.setBackground(Constants.WH_BACKGROUND);
         wrapper.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
@@ -139,14 +199,16 @@ public class DiscussionDetail extends JPanel {
         String editedMark = msg.edited ? " <span style='color:gray;'>(édité)</span>" : "";
         String bgColor = isSent
             ? String.format("#%02x%02x%02x", Colors.MESSAGE_BUBBLE.getRed(), Colors.MESSAGE_BUBBLE.getGreen(), Colors.MESSAGE_BUBBLE.getBlue())
-            : "#FFFFFF";
-        String html = "<html><div style='width:220px; word-wrap:break-word; padding:6px 10px; background-color:" + bgColor + "; border:1px solid #ddd; border-radius:12px;'>"
-                + "<div style='font-size:12px; color:black;'>" + text + editedMark + "</div>"
-                + "<div style='font-size:10px; color:gray; text-align:right; margin-top:4px;'>" + time + "</div>"
+            : "#F5F9FA";
+        String borderColor = isSent ? "#B2DFDB" : "#E0E0E0";
+        // --- Make bubble smaller and more rounded ---
+        String html = "<html><div style='width:170px; word-wrap:break-word; padding:8px 14px; background-color:" + bgColor + "; border:1px solid " + borderColor + "; border-radius:24px;'>"
+                + "<div style='font-size:12px; color:#222831;'>" + text + editedMark + "</div>"
+                + "<div style='font-size:9px; color:gray; text-align:right; margin-top:3px;'>" + time + "</div>"
                 + "</div></html>";
         JLabel lbl = new JLabel(html);
-        lbl.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        lbl.setMaximumSize(new Dimension(300, Integer.MAX_VALUE));
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lbl.setMaximumSize(new Dimension(220, Integer.MAX_VALUE));
         JPanel wrapper = new JPanel(new FlowLayout(isSent ? FlowLayout.RIGHT : FlowLayout.LEFT, 0, 0));
         wrapper.setBackground(Constants.WH_BACKGROUND);
         wrapper.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));

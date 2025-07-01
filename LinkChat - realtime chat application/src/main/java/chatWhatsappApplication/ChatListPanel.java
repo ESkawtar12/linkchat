@@ -42,11 +42,11 @@ public class ChatListPanel extends JPanel {
         JTextField search = new JTextField();
         search.putClientProperty("JTextField.placeholderText", "Rechercher ou démarrer une discussion");
         search.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
-        top.add(new JLabel(new ImageIcon("src/resources/search.png")), BorderLayout.WEST);
+        top.add(new JLabel(new ImageIcon("src/main/java/resources/search.png")), BorderLayout.WEST);
         top.add(search, BorderLayout.CENTER);
 
         JButton btnOptions = new JButton(new ImageIcon(
-            new ImageIcon("src/resources/more.png").getImage()
+            new ImageIcon("src/main/java/resources/more.png").getImage()
             .getScaledInstance(24, 24, Image.SCALE_SMOOTH)
         ));
         btnOptions.setBorderPainted(false);

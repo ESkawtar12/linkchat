@@ -32,45 +32,69 @@ public class LoginPanel extends JPanel {
 
     private void initializeUI() {
         setLayout(new GridBagLayout());
-        setBackground(Constants.WH_BACKGROUND);
+        setBackground(Color.WHITE); // Make background white
 
-        // Conteneur principal avec GridBagLayout pour un centrage parfait
+        // Main container for centering
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        centerPanel.setBackground(Constants.WH_BACKGROUND);
-        centerPanel.setMaximumSize(new Dimension(400, Integer.MAX_VALUE));
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        centerPanel.setBackground(Color.WHITE);
+        centerPanel.setMaximumSize(new Dimension(420, Integer.MAX_VALUE));
 
-        // Titre
+        // App name styled
+        JLabel appNameLabel = new JLabel("LinkChat");
+        appNameLabel.setFont(new Font("Segoe UI", Font.BOLD, 40));
+        appNameLabel.setForeground(Constants.WH_GREEN);
+        appNameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        appNameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 18, 0));
+
+        // Title
         JLabel titleLabel = new JLabel("Connexion");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 24, 0));
 
-        // Panel du formulaire
-        JPanel formPanel = new JPanel();
+        // Form panel with rounded corners and subtle shadow
+        JPanel formPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 22, 22);
+                g2.setColor(new Color(0, 0, 0, 12));
+                g2.fillRoundRect(3, getHeight() - 12, getWidth() - 6, 12, 12, 12);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        formPanel.setBackground(Constants.WH_BACKGROUND);
+        formPanel.setBackground(new Color(0,0,0,0));
         formPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         formPanel.setMaximumSize(new Dimension(350, Integer.MAX_VALUE));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(32, 32, 32, 32));
 
-        // Champs de formulaire
+        // Email field
         emailField = new JTextField(20);
-        emailField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        emailField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        emailField.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        emailField.setBackground(new Color(245, 249, 250));
         emailField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.GRAY, 1, true),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
-        
-        passwordField = new JPasswordField(20);
-        passwordField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        passwordField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.GRAY, 1, true),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true),
+            BorderFactory.createEmptyBorder(7, 12, 7, 12)
         ));
 
-        // Boutons
+        // Password field
+        passwordField = new JPasswordField(20);
+        passwordField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        passwordField.setBackground(new Color(245, 249, 250));
+        passwordField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true),
+            BorderFactory.createEmptyBorder(7, 12, 7, 12)
+        ));
+
+        // Login button
         loginButton = new JButton("Se connecter");
         loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         loginButton.setBackground(Constants.WH_GREEN);
@@ -78,61 +102,68 @@ public class LoginPanel extends JPanel {
         loginButton.setFocusPainted(false);
         loginButton.setBorderPainted(false);
         loginButton.setOpaque(true);
+        loginButton.setFont(new Font("Segoe UI", Font.BOLD, 15));
         loginButton.setPreferredSize(new Dimension(200, 40));
         loginButton.setMaximumSize(new Dimension(200, 40));
-        
+        loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Register button (styled as link)
         registerButton = new JButton("Créer un compte");
         registerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         registerButton.setBorderPainted(false);
         registerButton.setFocusPainted(false);
         registerButton.setContentAreaFilled(false);
-        registerButton.setForeground(Constants.WH_GREEN);
+        registerButton.setForeground(Constants.WH_GREEN.darker());
+        registerButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         registerButton.setOpaque(false);
+        registerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Message d'erreur
+        // Error message
         messageLabel = new JLabel(" ");
-        messageLabel.setForeground(Color.RED);
+        messageLabel.setForeground(new Color(220, 50, 50));
+        messageLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Ajout des composants au formulaire
+        // Add fields to form panel
         formPanel.add(createFormField("Email", emailField));
         formPanel.add(Box.createRigidArea(new Dimension(0, 15)));
         formPanel.add(createFormField("Mot de passe", passwordField));
-        formPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        formPanel.add(Box.createRigidArea(new Dimension(0, 22)));
         formPanel.add(loginButton);
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         formPanel.add(registerButton);
         formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         formPanel.add(messageLabel);
 
-        // Ajout des composants au panel principal
+        // Add to center panel
         centerPanel.add(Box.createVerticalGlue());
+        centerPanel.add(appNameLabel);
         centerPanel.add(titleLabel);
-        centerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         centerPanel.add(formPanel);
         centerPanel.add(Box.createVerticalGlue());
-        
-        // Création d'un conteneur intermédiaire pour le centrage
+
+        // Center everything
         JPanel wrapper = new JPanel(new GridBagLayout());
-        wrapper.setBackground(Constants.WH_BACKGROUND);
+        wrapper.setBackground(Color.WHITE);
         wrapper.add(centerPanel);
-        
+
         add(wrapper);
 
-        // Ajout des écouteurs d'événements
+        // Event listeners
         setupEventListeners();
     }
-
 
     private JPanel createFormField(String label, JComponent field) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(Constants.WH_BACKGROUND);
+        panel.setBackground(Color.WHITE);
         panel.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.setMaximumSize(new Dimension(300, 70));
         
         JLabel jLabel = new JLabel(label);
         jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        jLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         jLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
         
         field.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -140,6 +171,7 @@ public class LoginPanel extends JPanel {
         
         panel.add(jLabel);
         panel.add(field);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
         return panel;
     }

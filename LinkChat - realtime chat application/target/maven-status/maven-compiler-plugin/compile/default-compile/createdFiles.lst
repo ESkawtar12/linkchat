@@ -1,14 +1,17 @@
 chatWhatsappApplication\client\ChatClient$MessageListener.class
 chatWhatsappApplication\DiscussionDetail$1.class
+chatWhatsappApplication\DiscussionDetail$4.class
 chatWhatsappApplication\service\UserStorage.class
 chatWhatsappApplication\ProfilePanel.class
 chatWhatsappApplication\Colors.class
+chatWhatsappApplication\auth\LoginPanel$1.class
 chatWhatsappApplication\auth\LoginPanel.class
 chatWhatsappApplication\Main.class
 chatWhatsappApplication\ProfilePanel$5.class
 chatWhatsappApplication\util\SimpleDocumentListener.class
 chatWhatsappApplication\ContactProfilePanel.class
 chatWhatsappApplication\Profil.class
+chatWhatsappApplication\DiscussionDetail$3.class
 chatWhatsappApplication\DiscussionTile.class
 chatWhatsappApplication\auth\RegisterPanel.class
 chatWhatsappApplication\DiscussionTile$1.class
@@ -32,4 +35,5 @@ chatWhatsappApplication\service\MessageService$Message.class
 chatWhatsappApplication\DiscussionDetail.class
 chatWhatsappApplication\client\ChatClient$OnlineStatusListener.class
 chatWhatsappApplication\ProfilePanel$3.class
+chatWhatsappApplication\auth\RegisterPanel$1.class
 chatWhatsappApplication\Constants.class

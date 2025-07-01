@@ -25,7 +25,7 @@ public class RegisterPanel extends JPanel {
     private JLabel messageLabel;
     private final CardLayout cardLayout;
     private final JPanel mainPanel;
-    private String profileImage = "src/resources/default.jpg";
+    private String profileImage = "src/main/java/resources/default.jpg";
 
     public RegisterPanel(JPanel mainPanel, CardLayout cardLayout) {
         this.mainPanel = mainPanel;
@@ -34,23 +34,33 @@ public class RegisterPanel extends JPanel {
     }
 
     private void initializeUI() {
-        setLayout(new BorderLayout());
-        setBackground(Constants.WH_BACKGROUND);
+        setLayout(new GridBagLayout());
+        setBackground(Color.WHITE); // Make background white
 
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        formPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
-        formPanel.setBackground(Constants.WH_BACKGROUND);
+        // Main container for centering
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+        centerPanel.setBackground(Color.WHITE);
+        centerPanel.setMaximumSize(new Dimension(520, Integer.MAX_VALUE));
+
+        // App name styled
+        JLabel appNameLabel = new JLabel("LinkChat");
+        appNameLabel.setFont(new Font("Segoe UI", Font.BOLD, 40));
+        appNameLabel.setForeground(Constants.WH_GREEN);
+        appNameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        appNameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 18, 0));
 
         // Header
         backButton = new JButton();
         JLabel titleLabel = new JLabel("Créer un compte", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         backButton.setBorderPainted(false);
         backButton.setContentAreaFilled(false);
         backButton.setFocusPainted(false);
         try {
-            ImageIcon backIcon = new ImageIcon("src/resources/angle-left.png");
+            ImageIcon backIcon = new ImageIcon("src/main/java/resources/angle-left.png");
             Image scaled = backIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
             backButton.setIcon(new ImageIcon(scaled));
         } catch (Exception ex) {
@@ -58,10 +68,30 @@ public class RegisterPanel extends JPanel {
         }
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "login"));
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(Constants.WH_BACKGROUND);
+        header.setBackground(Color.WHITE);
         header.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         header.add(backButton, BorderLayout.WEST);
         header.add(titleLabel, BorderLayout.CENTER);
+
+        // Form panel with rounded corners and subtle shadow
+        JPanel formPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 22, 22);
+                g2.setColor(new Color(0, 0, 0, 12));
+                g2.fillRoundRect(3, getHeight() - 12, getWidth() - 6, 12, 12, 12);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+        formPanel.setBackground(new Color(0,0,0,0));
+        formPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        formPanel.setMaximumSize(new Dimension(480, Integer.MAX_VALUE));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(32, 32, 32, 32));
 
         // Fields
         firstNameField = createFormattedTextField();
@@ -72,58 +102,83 @@ public class RegisterPanel extends JPanel {
         birthDateField = createFormattedTextField();
         String[] genders = {"Sélectionner un genre", "Masculin", "Féminin", "Autre"};
         genderComboBox = new JComboBox<>(genders);
-        genderComboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        genderComboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         genderComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        genderComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        genderComboBox.setBackground(new Color(245, 249, 250));
+        genderComboBox.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true));
 
-        // Assemble scroll content
-        JPanel scrollContent = new JPanel();
-        scrollContent.setLayout(new BoxLayout(scrollContent, BoxLayout.Y_AXIS));
-        scrollContent.setBackground(Constants.WH_BACKGROUND);
-        scrollContent.add(header);
-        scrollContent.add(createFormField("Prénom", firstNameField));
-        scrollContent.add(createFormField("Nom", lastNameField));
-        scrollContent.add(createFormField("Email", emailField));
-        scrollContent.add(createFormField("Mot de passe", passwordField));
-        scrollContent.add(createFormField("Confirmer mot de passe", confirmPasswordField));
-        scrollContent.add(createFormField("Date de naissance (AAAA-MM-JJ)", birthDateField));
-        scrollContent.add(createFormField("Genre", genderComboBox));
+        // --- Use GridLayout for two columns ---
+        JPanel gridPanel = new JPanel(new GridLayout(0, 2, 16, 0));
+        gridPanel.setOpaque(false);
+
+        gridPanel.add(createFormField("Prénom", firstNameField));
+        gridPanel.add(createFormField("Nom", lastNameField));
+        gridPanel.add(createFormField("Email", emailField));
+        gridPanel.add(createFormField("Date de naissance (AAAA-MM-JJ)", birthDateField));
+        gridPanel.add(createFormField("Mot de passe", passwordField));
+        gridPanel.add(createFormField("Confirmer mot de passe", confirmPasswordField));
+        gridPanel.add(createFormField("Genre", genderComboBox));
+        // Empty cell for alignment
+        gridPanel.add(new JLabel(""));
+
+        formPanel.add(gridPanel);
 
         // Choose image button
         JButton chooseImageBtn = new JButton("Choisir une photo de profil");
         chooseImageBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        chooseImageBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        chooseImageBtn.setBackground(new Color(245, 249, 250));
+        chooseImageBtn.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true));
+        chooseImageBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         chooseImageBtn.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 profileImage = chooser.getSelectedFile().getAbsolutePath();
             }
         });
-        scrollContent.add(Box.createRigidArea(new Dimension(0, 10)));
-        scrollContent.add(chooseImageBtn);
-        scrollContent.add(Box.createRigidArea(new Dimension(0, 20)));
+        formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        formPanel.add(chooseImageBtn);
+        formPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
         // Register button & message
         registerButton = new JButton("S'inscrire");
         registerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         registerButton.setBackground(Constants.WH_GREEN);
         registerButton.setForeground(Color.WHITE);
-        registerButton.setFont(new Font("Arial", Font.BOLD, 14));
+        registerButton.setFont(new Font("Segoe UI", Font.BOLD, 15));
         registerButton.setFocusPainted(false);
         registerButton.setBorderPainted(false);
         registerButton.setOpaque(true);
         registerButton.setEnabled(false);
+        registerButton.setPreferredSize(new Dimension(200, 40));
+        registerButton.setMaximumSize(new Dimension(200, 40));
+        registerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         registerButton.addActionListener(e -> onRegister());
+
         messageLabel = new JLabel(" ");
         messageLabel.setForeground(Color.RED);
+        messageLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        scrollContent.add(registerButton);
-        scrollContent.add(Box.createRigidArea(new Dimension(0, 10)));
-        scrollContent.add(messageLabel);
+        formPanel.add(registerButton);
+        formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        formPanel.add(messageLabel);
 
-        JScrollPane scrollPane = new JScrollPane(scrollContent);
-        scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(Constants.WH_BACKGROUND);
-        add(scrollPane, BorderLayout.CENTER);
+        // Add to center panel
+        centerPanel.add(Box.createVerticalGlue());
+        centerPanel.add(appNameLabel);
+        centerPanel.add(header);
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        centerPanel.add(formPanel);
+        centerPanel.add(Box.createVerticalGlue());
+
+        // Center everything
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setBackground(Color.WHITE);
+        wrapper.add(centerPanel);
+
+        add(wrapper);
 
         setupValidation();
     }
@@ -200,24 +255,38 @@ public class RegisterPanel extends JPanel {
 
     private JTextField createFormattedTextField() {
         JTextField f = new JTextField(20);
-        f.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        f.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        f.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        f.setBackground(new Color(245, 249, 250));
+        f.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true),
+            BorderFactory.createEmptyBorder(7, 12, 7, 12)
+        ));
         return f;
     }
 
     private JPasswordField createPasswordField() {
         JPasswordField p = new JPasswordField(20);
-        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        p.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        p.setBackground(new Color(245, 249, 250));
+        p.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true),
+            BorderFactory.createEmptyBorder(7, 12, 7, 12)
+        ));
         return p;
     }
 
     private JPanel createFormField(String label, JComponent field) {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setBackground(Constants.WH_BACKGROUND);
+        p.setBackground(Color.WHITE);
         JLabel l = new JLabel(label);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         l.setAlignmentX(Component.LEFT_ALIGNMENT);
         field.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.add(l);
+        p.add(Box.createRigidArea(new Dimension(0, 3)));
         p.add(field);
         p.add(Box.createRigidArea(new Dimension(0, 10)));
         return p;

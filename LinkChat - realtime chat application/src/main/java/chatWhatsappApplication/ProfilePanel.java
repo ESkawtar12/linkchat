@@ -51,7 +51,7 @@ public class ProfilePanel extends JPanel {
         
         // Bouton retour avec icône
         JButton backButton = new JButton(new ImageIcon(
-                new ImageIcon("src/resources/angle-left.png").getImage()
+                new ImageIcon("src/main/java/resources/angle-left.png").getImage()
                         .getScaledInstance(24, 24, Image.SCALE_SMOOTH)));
         backButton.setBorderPainted(false);
         backButton.setContentAreaFilled(false);
@@ -93,7 +93,7 @@ public class ProfilePanel extends JPanel {
         imageContainer.setBackground(Constants.WH_BACKGROUND);
         
         // Charger l'image de profil par défaut
-        String defaultImagePath = "src/resources/user.png";
+        String defaultImagePath = "src/main/java/resources/user.png";
         profileImage = createCircularAvatar(defaultImagePath);
         profileImage.setHorizontalAlignment(JLabel.CENTER);
         
@@ -484,7 +484,7 @@ public class ProfilePanel extends JPanel {
                     // Utiliser le dossier resources déjà vérifié
                     
                     // Créer une copie de l'image dans le dossier de ressources
-                    String destPath = "src/resources/user_" + System.currentTimeMillis() + ".png";
+                    String destPath = "src/main/java/resources/user_" + System.currentTimeMillis() + ".png";
                     File destFile = new File(destPath);
                     
                     System.out.println("Tentative de copie vers : " + destFile.getAbsolutePath());
@@ -665,7 +665,7 @@ public class ProfilePanel extends JPanel {
     private JButton createEditButton() {
         JButton button = new JButton();
         button.setIcon(new ImageIcon(
-            new ImageIcon("src/resources/pen.png").getImage()
+            new ImageIcon("src/main/java/resources/pen.png").getImage()
                     .getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
