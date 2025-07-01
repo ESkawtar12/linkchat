@@ -121,5 +121,37 @@ public List<User> getFriends(int userId) {
     return friends;
 }
 
+public boolean removeFriendByEmail(int currentUserId, String friendEmail) {
+    String findUserQuery = "SELECT id FROM users WHERE email = ?";
+    String deleteFriendQuery = "DELETE FROM friends WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)";
 
+    try (Connection conn = DatabaseConnection.getConnection()) {
+        int friendId = -1;
+
+        // 1. Vérifier si l’email existe
+        try (PreparedStatement findStmt = conn.prepareStatement(findUserQuery)) {
+            findStmt.setString(1, friendEmail);
+            ResultSet rs = findStmt.executeQuery();
+
+            if (rs.next()) {
+                friendId = rs.getInt("id");
+            } else {
+                return false;
+            }
+        }
+
+        // 2. Supprimer l’ami (dans les deux sens)
+        try (PreparedStatement deleteStmt = conn.prepareStatement(deleteFriendQuery)) {
+            deleteStmt.setInt(1, currentUserId);
+            deleteStmt.setInt(2, friendId);
+            deleteStmt.setInt(3, friendId);
+            deleteStmt.setInt(4, currentUserId);
+            int affected = deleteStmt.executeUpdate();
+            return affected > 0;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 }

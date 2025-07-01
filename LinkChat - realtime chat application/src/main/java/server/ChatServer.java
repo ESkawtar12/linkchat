@@ -69,6 +69,10 @@ public class ChatServer extends WebSocketServer {
             WebSocket dest = clients.get(m.to);
             if (dest != null) dest.send(message);
         }
+         else if (m.type.equals("typing")) {
+            WebSocket dest = clients.get(m.to);
+            if (dest != null) dest.send(message);
+        }
     }
 
     @Override

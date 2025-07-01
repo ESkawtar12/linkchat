@@ -31,8 +31,6 @@ public class DiscussionTile extends JPanel {
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
         setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
         setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Rounded corners and shadow
         setOpaque(false);
 
         // Avatar
@@ -66,7 +64,7 @@ public class DiscussionTile extends JPanel {
         dateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         add(dateLabel, BorderLayout.EAST);
 
-        // Hover effect
+        // Mouse listener (left click for discussion, right click for delete)
         addMouseListener(new MouseAdapter() {
             Color normalBg = Color.WHITE;
             Color hoverBg = new Color(245, 249, 250);
@@ -85,28 +83,54 @@ public class DiscussionTile extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                String panelName = "Discussion_" + email;
-                boolean exists = false;
-                for (Component c : mainPanel.getComponents()) {
-                    if (panelName.equals(c.getName())) {
-                        exists = true;
-                        break;
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    showDeleteMenu(e.getComponent(), e.getY());
+                } else if (SwingUtilities.isLeftMouseButton(e)) {
+                    String panelName = "Discussion_" + email;
+                    boolean exists = false;
+                    for (Component c : mainPanel.getComponents()) {
+                        if (panelName.equals(c.getName())) {
+                            exists = true;
+                            break;
+                        }
                     }
+                    if (!exists) {
+                        DiscussionDetail det = new DiscussionDetail(name, email, mainPanel, cardLayout, wsClient);
+                        det.setName(panelName);
+                        mainPanel.add(det, panelName);
+                        Main.discussionPanels.put(email, det);
+                    }
+                    cardLayout.show(mainPanel, panelName);
                 }
-                if (!exists) {
-                    DiscussionDetail det = new DiscussionDetail(name, email, mainPanel, cardLayout, wsClient);
-                    det.setName(panelName);
-                    mainPanel.add(det, panelName);
-                    Main.discussionPanels.put(email, det);
-                }
-                cardLayout.show(mainPanel, panelName);
             }
         });
     }
 
+    private void showDeleteMenu(Component parent, int y) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem deleteItem = new JMenuItem("Supprimer le contact");
+        deleteItem.addActionListener(e -> {
+            int userId = chatWhatsappApplication.service.AuthService.getInstance().getCurrentUser().getId();
+            boolean removed = chatWhatsappApplication.service.ContactService.getInstance()
+                .removeFriendByEmail(userId, email);
+            if (removed) {
+                Container parentPanel = getParent();
+                if (parentPanel != null) {
+                    parentPanel.remove(this);
+                    parentPanel.revalidate();
+                    parentPanel.repaint();
+                }
+                JOptionPane.showMessageDialog(this, "Contact supprimé !");
+            } else {
+                JOptionPane.showMessageDialog(this, "Erreur lors de la suppression.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        menu.add(deleteItem);
+        menu.show(parent, 0, y);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
-        // Draw rounded panel with shadow
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -114,11 +138,9 @@ public class DiscussionTile extends JPanel {
         int shadowGap = 2;
         int shadowAlpha = 30;
 
-        // Shadow
         g2.setColor(new Color(0, 0, 0, shadowAlpha));
         g2.fillRoundRect(shadowGap, shadowGap, getWidth() - shadowGap * 2, getHeight() - shadowGap * 2, arc, arc);
 
-        // Background
         g2.setColor(getBackground());
         g2.fillRoundRect(0, 0, getWidth() - shadowGap, getHeight() - shadowGap, arc, arc);
 

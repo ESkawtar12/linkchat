@@ -5,12 +5,16 @@ import chatWhatsappApplication.service.ContactService;
 import chatWhatsappApplication.service.DatabaseConnection;
 import chatWhatsappApplication.service.MessageService;
 import chatWhatsappApplication.client.ChatClient;
+import chatWhatsappApplication.DiscussionTile;
+
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -199,14 +203,44 @@ public class ChatListPanel extends JPanel {
         repaint();
     }
 
-    private void addTile(String name, String msg, String date, String imgPath, String email) {
-        ImageIcon icon = new ImageIcon(
-            new ImageIcon(imgPath).getImage()
-            .getScaledInstance(40,40,Image.SCALE_SMOOTH)
+    private void addTile(String displayName, String status, String date, String img, String email) {
+        // Create the avatar icon
+        Icon avatar = new ImageIcon(
+            new ImageIcon(img).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)
         );
-        DiscussionTile tile = new DiscussionTile(name, msg, date, icon, mainPanel, cardLayout, email, wsClient);
-        tiles.add(tile);
+
+        // Create a DiscussionTile instead of JPanel
+        DiscussionTile tile = new DiscussionTile(
+            displayName,         // name
+            status,              // lastMessage or status
+            date,                // date
+            avatar,              // avatar icon
+            mainPanel,           // mainPanel
+            cardLayout,          // cardLayout
+            email,               // email
+            wsClient             // wsClient
+        );
+
         tileContainer.add(tile);
+        tiles.add(tile);
+    }
+
+    private void showContactMenu(Component parent, String contactEmail) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem deleteItem = new JMenuItem("Supprimer le contact");
+        deleteItem.addActionListener(e -> {
+            int userId = AuthService.getInstance().getCurrentUser().getId();
+            boolean removed = chatWhatsappApplication.service.ContactService.getInstance()
+                .removeFriendByEmail(userId, contactEmail);
+            if (removed) {
+                loadFriends();
+                JOptionPane.showMessageDialog(this, "Contact supprimé !");
+            } else {
+                JOptionPane.showMessageDialog(this, "Erreur lors de la suppression.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        menu.add(deleteItem);
+        menu.show(parent, 0, parent.getHeight());
     }
 
     public static ChatListPanel getInstance() {
@@ -219,4 +253,5 @@ public class ChatListPanel extends JPanel {
              .findFirst()
              .ifPresent(t -> t.setContactName(newName));
     }
+    
 }
