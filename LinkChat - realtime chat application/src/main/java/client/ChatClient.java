@@ -37,6 +37,16 @@ public class ChatClient extends WebSocketClient {
         this.messageListener = listener;
     }
 
+    public interface TypingListener {
+        void onTypingReceived(String from);
+    }
+
+    private TypingListener typingListener;
+
+    public void setTypingListener(TypingListener listener) {
+        this.typingListener = listener;
+    }
+
     @Override
     public void onMessage(String messageJson) {
         Message message = gson.fromJson(messageJson, Message.class);
@@ -66,6 +76,12 @@ public class ChatClient extends WebSocketClient {
             DiscussionDetail panel = chatWhatsappApplication.Main.discussionPanels.get(message.from);
             if (panel != null) {
                 SwingUtilities.invokeLater(panel::loadPreviousMessages);
+            }
+            return;
+        }
+        if ("typing".equals(message.type)) {
+            if (typingListener != null) {
+                typingListener.onTypingReceived(message.from);
             }
             return;
         }
@@ -130,6 +146,11 @@ public class ChatClient extends WebSocketClient {
 
     public void sendEditMessage(String to, int messageId, String newContent) {
         Message message = new Message("edit", myEmail, to, messageId + ":" + newContent);
+        send(gson.toJson(message));
+    }
+
+    public void sendTypingMessage(String to) {
+        Message message = new Message("typing", myEmail, to, "");
         send(gson.toJson(message));
     }
 }

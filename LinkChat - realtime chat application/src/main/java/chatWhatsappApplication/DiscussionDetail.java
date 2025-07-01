@@ -32,6 +32,7 @@ public class DiscussionDetail extends JPanel {
     private final ChatClient wsClient;
 
     private final Gson gson = new Gson();
+    private final JLabel typingLabel = new JLabel(""); // <-- Typing label
 
     public DiscussionDetail(String name, String email, JPanel mainPanel, CardLayout cardLayout, ChatClient wsClient) {
         this.contactName = name;
@@ -132,6 +133,21 @@ public class DiscussionDetail extends JPanel {
         inputField.setForeground(new Color(34, 40, 49));
         inputField.addActionListener(this::sendMessage);
 
+        // --- Add typing event ---
+        inputField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            private long lastTyped = 0;
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { sendTyping(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { sendTyping(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { sendTyping(); }
+            private void sendTyping() {
+                long now = System.currentTimeMillis();
+                if (wsClient != null && now - lastTyped > 500) { // throttle to avoid spamming
+                    wsClient.sendTypingMessage(contactEmail);
+                    lastTyped = now;
+                }
+            }
+        });
+
         // --- Fix send button icon and style ---
         ImageIcon sendIcon;
         try {
@@ -153,12 +169,39 @@ public class DiscussionDetail extends JPanel {
         inputPanel.add(inputField, BorderLayout.CENTER);
         inputPanel.add(sendButton, BorderLayout.EAST);
 
+        // --- Typing label settings ---
+        typingLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        typingLabel.setForeground(new Color(120, 120, 120));
+        typingLabel.setVisible(false);
+
+        JPanel inputWrapper = new JPanel();
+        inputWrapper.setLayout(new BorderLayout());
+        inputWrapper.setOpaque(false);
+        inputWrapper.add(typingLabel, BorderLayout.NORTH);
+        inputWrapper.add(inputPanel, BorderLayout.CENTER);
+
         add(topBar, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
-        add(inputPanel, BorderLayout.SOUTH);
+        add(inputWrapper, BorderLayout.SOUTH);
 
         // After initializing UI components, load previous messages:
         loadPreviousMessages();
+
+        // Register typing listener
+        if (wsClient != null) {
+            wsClient.setTypingListener(from -> {
+                if (contactEmail.equals(from)) {
+                    SwingUtilities.invokeLater(() -> {
+                        typingLabel.setText(contactName + " est en train d'écrire...");
+                        typingLabel.setVisible(true);
+                        // Hide after 2 seconds if no new typing event
+                        Timer timer = new Timer(2000, e -> typingLabel.setVisible(false));
+                        timer.setRepeats(false);
+                        timer.start();
+                    });
+                }
+            });
+        }
     }
 
     private void showContactProfile() {

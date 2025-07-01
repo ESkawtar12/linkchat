@@ -26,9 +26,11 @@ chatWhatsappApplication\server\ChatServer$Message.class
 chatWhatsappApplication\client\ChatClient.class
 chatWhatsappApplication\server\ChatServer.class
 chatWhatsappApplication\service\AuthService.class
+chatWhatsappApplication\DiscussionDetail$5.class
 chatWhatsappApplication\service\DatabaseConnection.class
 chatWhatsappApplication\DiscussionDetail$2.class
 chatWhatsappApplication\RoundedPanel.class
+chatWhatsappApplication\client\ChatClient$TypingListener.class
 chatWhatsappApplication\service\ContactService.class
 chatWhatsappApplication\service\MessageService.class
 chatWhatsappApplication\service\MessageService$Message.class
