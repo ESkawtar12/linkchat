@@ -168,7 +168,7 @@ public class ChatListPanel extends JPanel {
 
     private void updateOnlineStatus(List<String> onlineEmails) {
         lastOnlineEmails = onlineEmails;
-        // loadFriends();
+         loadFriends();
     }
 
     // Helper class to store friend info

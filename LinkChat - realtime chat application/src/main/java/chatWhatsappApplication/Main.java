@@ -126,7 +126,7 @@ public class Main {
         rightPanel.add(placeholderPanel, "ChatList");
 
         chatListPanel = new ChatListPanel(rightPanel, rightCardLayout, wsClient);
-        chatListPanel.loadFriends();
+        // chatListPanel.loadFriends();
 
         ProfilePanel profilePanel = new ProfilePanel(rightPanel, rightCardLayout);
         rightPanel.add(profilePanel, "Profile");
