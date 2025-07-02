@@ -270,10 +270,23 @@ public class DiscussionDetail extends JPanel {
             System.out.println("Message not sent: empty or wsClient is null");
             return;
         }
+
+        // Optimistically add the message bubble to the UI
+        MessageService.Message myMsg = new MessageService.Message(
+            -1, // No DB id yet
+            AuthService.getInstance().getCurrentUser().getEmail(),
+            contactEmail,
+            text,
+            false,
+            false
+        );
+        messagePanel.add(createMessageBubble(myMsg, true));
+        messagePanel.revalidate();
+        messagePanel.repaint();
+        scrollToBottom();
+
         wsClient.sendMessage(contactEmail, text);
         inputField.setText("");
-        // Instead of adding the bubble directly, reload all messages:
-        loadPreviousMessages();
     }
 
     public void receiveMessage(String text) {
