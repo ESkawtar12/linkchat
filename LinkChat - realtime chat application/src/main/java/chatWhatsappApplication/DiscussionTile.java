@@ -29,7 +29,13 @@ public class DiscussionTile extends JPanel {
         setLayout(new BorderLayout(16, 0));
         setBackground(Color.WHITE);
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
-        setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+
+        // ✅ Stylish, light gray bottom line with padding
+        setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(0, 0, 0, 40)), // thin, light gray
+            BorderFactory.createEmptyBorder(10, 16, 10, 16) // padding: top, left, bottom, right
+        ));
+
         setCursor(new Cursor(Cursor.HAND_CURSOR));
         setOpaque(false);
 
@@ -64,10 +70,10 @@ public class DiscussionTile extends JPanel {
         dateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         add(dateLabel, BorderLayout.EAST);
 
-        // Mouse listener (left click for discussion, right click for delete)
+        // Mouse listener (hover & click)
         addMouseListener(new MouseAdapter() {
             Color normalBg = Color.WHITE;
-            Color hoverBg = new Color(245, 249, 250);
+            Color hoverBg = new Color(245, 248, 255); // subtle blueish
 
             @Override
             public void mouseEntered(MouseEvent e) {

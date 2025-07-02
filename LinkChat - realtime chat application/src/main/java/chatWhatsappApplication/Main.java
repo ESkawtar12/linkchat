@@ -97,11 +97,32 @@ public class Main {
         JPanel rightPanel = new JPanel(rightCardLayout);
 
         JPanel placeholderPanel = new JPanel(new BorderLayout());
-        JLabel placeholderLabel = new JLabel("Sélectionnez un chat pour commencer", SwingConstants.CENTER);
-        placeholderLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
-        placeholderLabel.setForeground(Color.GRAY);
-        placeholderPanel.add(placeholderLabel, BorderLayout.CENTER);
-        placeholderPanel.setBackground(Constants.WH_BACKGROUND);
+        placeholderPanel.setBackground(Color.WHITE);
+
+        // Title styled like LoginPanel
+        JLabel titleLabel = new JLabel("Welcome to LinkChat", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 40));
+        titleLabel.setForeground(Constants.WH_GREEN);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 18, 0));
+
+        // Subtitle message
+        JLabel subtitleLabel = new JLabel(
+            "<html><div style='text-align:center;'>Start a conversation by selecting a friend.<br>Enjoy real-time messaging with your friends!</div></html>",
+            SwingConstants.CENTER
+        );
+        subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        subtitleLabel.setForeground(Color.GRAY);
+        subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Vertical layout for title and subtitle
+        Box box = Box.createVerticalBox();
+        box.add(Box.createVerticalGlue());
+        box.add(titleLabel);
+        box.add(subtitleLabel);
+        box.add(Box.createVerticalGlue());
+
+        placeholderPanel.add(box, BorderLayout.CENTER);
         rightPanel.add(placeholderPanel, "ChatList");
 
         chatListPanel = new ChatListPanel(rightPanel, rightCardLayout, wsClient);

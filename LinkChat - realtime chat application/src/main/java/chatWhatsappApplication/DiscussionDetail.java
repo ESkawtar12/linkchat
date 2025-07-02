@@ -128,7 +128,10 @@ public class DiscussionDetail extends JPanel {
 
         inputField = new JTextField();
         inputField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        inputField.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+        inputField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(0, 0, 0, 40)), // thin, light gray line at bottom
+            BorderFactory.createEmptyBorder(8, 12, 8, 12) // inner padding
+        ));
         inputField.setBackground(new Color(245, 249, 250));
         inputField.setForeground(new Color(34, 40, 49));
         inputField.addActionListener(this::sendMessage);
