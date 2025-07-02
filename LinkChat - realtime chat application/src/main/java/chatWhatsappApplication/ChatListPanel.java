@@ -107,6 +107,7 @@ public class ChatListPanel extends JPanel {
         // Chargement initial des contacts
         // loadFriends();
         wsClient.setOnlineStatusListener(this::updateOnlineStatus);
+        wsClient.requestOnlineList(); // Force refresh after UI is ready
     }
 
     private void styleOptionButton(JButton btn) {
@@ -167,7 +168,7 @@ public class ChatListPanel extends JPanel {
 
     private void updateOnlineStatus(List<String> onlineEmails) {
         lastOnlineEmails = onlineEmails;
-        loadFriends();
+        // loadFriends();
     }
 
     // Helper class to store friend info

@@ -195,7 +195,7 @@ public class DiscussionDetail extends JPanel {
             wsClient.setTypingListener(from -> {
                 if (contactEmail.equals(from)) {
                     SwingUtilities.invokeLater(() -> {
-                        typingLabel.setText(contactName + " est en train d'écrire...");
+                        typingLabel.setText( "en train d'écrire...");
                         typingLabel.setVisible(true);
                         // Hide after 2 seconds if no new typing event
                         Timer timer = new Timer(2000, e -> typingLabel.setVisible(false));
@@ -330,7 +330,9 @@ public class DiscussionDetail extends JPanel {
     }
 
     public void updateContactName(String newName) {
-        nameLabel.setText(newName);
+        // Remove trailing " (number)" if present
+        String cleaned = newName.replaceFirst("\\s*\\(\\d+\\)$", "");
+        nameLabel.setText(cleaned);
     }
 
     public void loadPreviousMessages() {
@@ -345,6 +347,8 @@ public class DiscussionDetail extends JPanel {
         MessageService.markAsRead(contactEmail, myEmail);
         // Update chat list UI
         ChatListPanel.getInstance().loadFriends();
+        // Remove unread count from top bar
+        updateContactName(contactName);
         messagePanel.revalidate();
         messagePanel.repaint();
         scrollToBottom();
